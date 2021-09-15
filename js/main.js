@@ -1,44 +1,56 @@
-        //https://pokeapi.co/api/v2/pokemon/
+const getPokemon = async (id) => {
+    try {
+        const respuesta = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`)
+        const data = await respuesta.json();
+        return data;
+    } catch (error) {
+        console.log(error)
+    }
+}
 
-        /* La función es asincronica, hago un wait y espera a que la promsa se cumpla */
-        /* Creamos una función que consulta la API y nos devuelve un resultado */
-        const getPokemon= async(id)=>{
-            //pedido para ver si existe, entonces devuelve una promesa
-            //hace el fetch y esperá
-            try{
-                const respuesta= await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`)
-                /* convierte a json y cuando termina lo guarda en data */
-                const data= await respuesta.json();
-                return data;
-            }catch(error){
-                console.log(error)
-            }  
-        }
+function UpdateAbility(habilidades) {
+    let arrayHabilidades = [];
+    for (let habilidad of habilidades) {
+        arrayHabilidades.push(habilidad.ability.name);
+    }
+    return arrayHabilidades;
+}
 
+async function PokeInfo(poke){
+    containerPoke.textContent = poke.name;
+    imagen.setAttribute('src', poke.sprites.front_default);
+    imagen2.setAttribute('src', poke.sprites.back_default);
+    imagen3.setAttribute('src', poke.sprites.front_shiny);
+    pokeId.textContent="Poke ID: "+poke.id;
+    let ability = await UpdateAbility(poke.abilities)
+    abilities.innerHTML =ability.toString();
+}
 
-        /* función que renderiza el resultado */
-        const updatePokemon=(item)=>{
-            console.log(item.name);
-            /* pokemon es el id del h1 */
-            pokemon.textContent=item.name;
-            imagen.setAttribute('src', item.sprites.front_default);
+async function PokeInfoSec(poke){
+    pokeEvolve.textContent = poke.name;
+    imagenEvo.setAttribute('src', poke.sprites.front_default);
+    imagenEvo2.setAttribute('src', poke.sprites.back_default);
+    imagenEvo3.setAttribute('src', poke.sprites.front_shiny);
+    let ability = await UpdateAbility(poke.abilities)
+    abilitiesEvo.innerHTML = "Abilities </br>" + ability.toString();
+}
 
-        }
+const updatePokemon = async (item) => {
+    let secondPokemon=await getPokemon(item.id+1);
+    try {
+        PokeInfo(item);
+        PokeInfoSec(secondPokemon);
+    } catch (e) {
+        console.error(e);
+    }
+}
+search.addEventListener('change', async () => {
+    const res = await getPokemon(search.value.toLowerCase());
+    updatePokemon(res);
+})
 
-        /* Pasamos el parametro de busqueda a la API */
-        search.addEventListener('change', async()=>{
-            const res= await getPokemon(search.value.toLowerCase());
-
-            updatePokemon(res);
-        })
-
-        const init= async()=>{
-            /* Llamamos una funcion que consulta la API  */
-            const firstPokemon= await getPokemon(25);
-            /*Llamamos a una función para renderizar el resultado */
-            updatePokemon(firstPokemon);
-        }
-
-        /* CADA VEZ QUE DEPENDO DE UN RESULTADO NECESIT USAR UN ASYNC AWAIT */
-
-        document.addEventListener('DOMContentLoaded', init)
+const init = async () => {
+    const firstPokemon = await getPokemon(25);
+    updatePokemon(firstPokemon);
+}
+document.addEventListener('DOMContentLoaded', init)
